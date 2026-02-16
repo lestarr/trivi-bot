@@ -85,8 +85,8 @@ async def ask(body: AskBody, authorization: str = Header(...)):
         tgts = cfg["translation"]["targets"]
         prompt = TRANSLATION_PROMPT.format(source=src, targets=tgts)
 
-    response_text = await llm.query(prompt, user_input)
-    return {"response": response_text, "mode": mode}
+    response_text, model_used = await llm.query(prompt, user_input)
+    return {"response": response_text, "mode": mode, "model": model_used}
 
 
 @app.get("/config")

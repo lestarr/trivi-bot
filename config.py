@@ -14,7 +14,10 @@ DEFAULT_CONFIG = {
             "prefix": "e",
             "full_prefix": "explain",
             "label": "Explain",
-            "prompt": "Explain the following concept in 3-6 sentences. Be clear and concise. No preamble.",
+            "prompt": (
+                "Explain the following concept in 3-6 sentences. Be clear and concise. "
+                "No preamble. Use short paragraphs or bullets for readability."
+            ),
             "deletable": False,
         },
         {
@@ -23,8 +26,7 @@ DEFAULT_CONFIG = {
             "label": "Command",
             "prompt": (
                 "Give the bash or python command for this task. "
-                "Include a one-line comment explaining what it does. "
-                "No preamble, no explanation beyond the comment. Just the command."
+                "No preamble, no explanation, no comments. Just the command."
             ),
             "deletable": False,
         },

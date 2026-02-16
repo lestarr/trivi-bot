@@ -255,7 +255,7 @@ body{
         return;
       }
       const data = await r.json();
-      modeBadge.textContent = data.mode;
+      modeBadge.textContent = data.model ? `${data.mode} • ${data.model}` : data.mode;
       renderResponse(data.response);
     }catch(e){
       responseDiv.textContent = 'Network error';
@@ -267,8 +267,9 @@ body{
   }
 
   function renderResponse(text){
+    const readableText = formatPlainTextForReadability(text);
     // Convert markdown code blocks to <pre><code>
-    let html = esc(text);
+    let html = esc(readableText);
     // Fenced code blocks
     html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
       return `<pre><code>${code.trim()}</code></pre>`;
@@ -284,7 +285,8 @@ body{
       btn.className = 'copy-btn';
       btn.textContent = 'Copy';
       btn.addEventListener('click', () => {
-        const code = pre.querySelector('code')?.textContent || pre.textContent;
+        const raw = pre.querySelector('code')?.textContent || pre.textContent;
+        const code = extractCommandOnly(raw);
         navigator.clipboard.writeText(code).then(() => {
           btn.textContent = '\u2713';
           setTimeout(() => btn.textContent = 'Copy', 1500);
@@ -293,6 +295,36 @@ body{
       pre.style.position = 'relative';
       pre.appendChild(btn);
     });
+  }
+
+  function formatPlainTextForReadability(raw){
+    const s = String(raw || '').trim();
+    if(!s) return s;
+    if(s.includes('```') || s.includes('\n')) return s;
+    const parts = s.match(/[^.!?]+[.!?]+(?:\s|$)|[^.!?]+$/g) || [s];
+    const sentences = parts.map(p => p.trim()).filter(Boolean);
+    if(sentences.length >= 3){
+      return sentences.join('\n\n');
+    }
+    return s;
+  }
+
+  function extractCommandOnly(raw){
+    const lines = String(raw).replace(/\r\n/g, '\n').split('\n');
+    const out = [];
+    for(const line of lines){
+      let t = line.trim();
+      if(!t) continue;
+      if(t.startsWith('#') || t.startsWith('//') || t.toLowerCase().startsWith('rem ')){
+        continue;
+      }
+      // Remove common shell prompt prefixes.
+      t = t.replace(/^\$\s+/, '').replace(/^>\s+/, '');
+      // Drop trailing inline shell comments: "cmd ... # comment".
+      t = t.replace(/\s+#.*$/, '').trim();
+      if(t) out.push(t);
+    }
+    return (out.join('\n').trim()) || String(raw).trim();
   }
 
   // --- Voice input ---
@@ -334,20 +366,6 @@ body{
   micBtn.addEventListener('mouseup', stopRecognition);
   micBtn.addEventListener('touchstart', e => { e.preventDefault(); startRecognition(); });
   micBtn.addEventListener('touchend', e => { e.preventDefault(); stopRecognition(); });
-
-  // Space-to-talk (only when input is not focused or is empty)
-  document.addEventListener('keydown', e => {
-    if(e.code === 'Space' && (document.activeElement !== qInput || qInput.value === '')){
-      if(document.activeElement === qInput) qInput.blur();
-      e.preventDefault();
-      startRecognition();
-    }
-  });
-  document.addEventListener('keyup', e => {
-    if(e.code === 'Space' && recognizing){
-      e.preventDefault();
-    }
-  });
 
   // --- PWA service worker ---
   if('serviceWorker' in navigator){
