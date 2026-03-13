@@ -1,5 +1,6 @@
 import os
 import re
+import unicodedata
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -47,9 +48,25 @@ def _bearer_token(authorization: str = Header(...)) -> str:
 
 # --- Routing logic ---
 
+# Cyrillic letters that look identical to Latin command prefixes
+_CYRILLIC_TO_LATIN = str.maketrans({
+    "\u0435": "e",  # Cyrillic е → Latin e
+    "\u0415": "E",  # Cyrillic Е → Latin E
+    "\u0441": "c",  # Cyrillic с → Latin c
+    "\u0421": "C",  # Cyrillic С → Latin C
+    "\u0440": "p",  # Cyrillic р → Latin p
+    "\u0420": "P",  # Cyrillic Р → Latin P
+    "\u043e": "o",  # Cyrillic о → Latin o
+    "\u041e": "O",  # Cyrillic О → Latin O
+    "\u0430": "a",  # Cyrillic а → Latin a
+    "\u0410": "A",  # Cyrillic А → Latin A
+})
+
+
 def _parse_input(text: str, commands: list[dict]) -> tuple[str, str, str]:
     """Return (mode_label, system_prompt, stripped_input)."""
-    lower = text.lower()
+    # Normalize Cyrillic lookalikes so "е деплой" matches prefix "e"
+    lower = text.lower().translate(_CYRILLIC_TO_LATIN)
     for cmd in commands:
         prefix_short = cmd["prefix"].lower() + " "
         prefix_full = cmd["full_prefix"].lower() + " "
@@ -58,6 +75,13 @@ def _parse_input(text: str, commands: list[dict]) -> tuple[str, str, str]:
         if lower.startswith(prefix_full):
             return cmd["label"], cmd["prompt"], text[len(prefix_full):]
     return "Translation", "", text  # default
+
+
+_CYRILLIC_RE = re.compile(r"[\u0400-\u04FF]")
+_UKRAINIAN_CUE = " (відповідай українською!)"
+
+# Modes where Cyrillic input should get a Ukrainian language cue
+_CUE_MODES = {"Explain", "Question"}
 
 
 # --- Endpoints ---
@@ -84,6 +108,10 @@ async def ask(body: AskBody, authorization: str = Header(...)):
         src = cfg["translation"]["source"]
         tgts = cfg["translation"]["targets"]
         prompt = TRANSLATION_PROMPT.format(source=src, targets=tgts)
+
+    # For Cyrillic input in explain/question modes, nudge Gemini toward Ukrainian
+    if mode in _CUE_MODES and _CYRILLIC_RE.search(user_input):
+        user_input = user_input + _UKRAINIAN_CUE
 
     response_text, model_used = await llm.query(prompt, user_input)
     return {"response": response_text, "mode": mode, "model": model_used}

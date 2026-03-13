@@ -44,9 +44,24 @@ UI URL:
 - Translation prompt is built from config source/target languages.
 - Gemini failures only fall back to OpenAI when status is `429` or `5xx`.
 
+## Language Enforcement
+
+- `llm.py` prepends a `LANGUAGE_GUARD` to every system prompt — forbids Russian, requires Ukrainian for Slavic input.
+- `main.py` appends `(відповідай українською!)` to Cyrillic user input in Explain/Question modes.
+- Both layers are needed: system prompt alone can be overridden by Gemini's language detection on ambiguous Cyrillic words.
+- `main.py` has `_CYRILLIC_TO_LATIN` homoglyph table so Cyrillic "е"/"с" prefixes route to correct command modes.
+
+### Gemini Language Behavior (Key Insight)
+
+- Gemini has strong internal language detection that can override system prompt instructions.
+- For ambiguous Cyrillic words (exist in both Russian/Ukrainian), Gemini defaults to Russian.
+- Fix requires **both** system-level guard AND input-level Ukrainian cue to reliably force Ukrainian.
+- End-of-prompt language instructions are deprioritized by Gemini; beginning-of-prompt placement is critical.
+
 ## Safe Change Guidelines
 
 - Keep auth behavior backward compatible.
 - Preserve response shape for `/ask` and config endpoints.
 - Keep default command structure stable unless intentionally migrating.
 - If editing `llm.py`, preserve fallback trigger semantics unless requested.
+- Preserve `LANGUAGE_GUARD` in `llm.py` and Ukrainian cue logic in `main.py` — both layers are required.

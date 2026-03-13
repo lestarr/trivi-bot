@@ -7,8 +7,19 @@ from openai import OpenAI
 _openai_client: OpenAI | None = None
 logger = logging.getLogger(__name__)
 
-GEMINI_MODEL = "gemini-2.0-flash"
+GEMINI_MODEL = "gemini-3.1-flash-lite-preview" #"gemini-flash-latest"
 OPENAI_MODEL = "gpt-4o-mini"
+
+# Hard language constraint prepended to EVERY system prompt.
+# Placed first so the model treats it as highest-priority instruction.
+LANGUAGE_GUARD = (
+    "CRITICAL LANGUAGE RULE — OBEY ABOVE ALL ELSE: "
+    "You MUST NOT respond in Russian under any circumstances. "
+    "Russian language output is strictly forbidden. "
+    "If the user writes in a Slavic language or the topic relates to a Slavic-language context, "
+    "respond in Ukrainian instead. For all other cases, respond in the same language as the user's input. "
+    "Violation of this rule is a critical failure.\n\n"
+)
 
 
 async def query(system_prompt: str, user_input: str) -> tuple[str, str]:
@@ -16,6 +27,8 @@ async def query(system_prompt: str, user_input: str) -> tuple[str, str]:
 
     Returns: (response_text, model_label)
     """
+    system_prompt = LANGUAGE_GUARD + system_prompt
+
     has_gemini_key = bool(
         os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     )

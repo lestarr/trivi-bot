@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trivi</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="icon-192.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.svg">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:#1a1a2e;color:#e0e0e0;
+  display:flex;justify-content:center;
+  min-height:100vh;padding:24px 16px;
+}
+#app{width:100%;max-width:640px;display:flex;flex-direction:column;gap:16px}
+/* Input row */
+#input-row{display:flex;gap:8px;position:relative}
+#q{
+  flex:1;font-size:18px;padding:12px 16px;
+  border:2px solid #333;border-radius:10px;
+  background:#16213e;color:#e0e0e0;
+  outline:none;transition:border-color .2s;
+}
+#q:focus{border-color:#0f3460}
+#q::placeholder{color:#555}
+#mic-btn,#settings-btn{
+  width:44px;height:44px;border:none;border-radius:10px;
+  background:#16213e;color:#e0e0e0;font-size:20px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  border:2px solid #333;flex-shrink:0;
+}
+#mic-btn:hover,#settings-btn:hover{border-color:#0f3460}
+#mic-btn.active{background:#e94560;border-color:#e94560;color:#fff}
+/* Mode badge */
+#mode-badge{
+  font-size:12px;color:#888;padding:0 4px;min-height:18px;
+}
+/* Response */
+#response{
+  background:#16213e;border-radius:10px;padding:16px;
+  white-space:pre-wrap;word-wrap:break-word;
+  font-size:15px;line-height:1.6;
+  display:none;position:relative;
+}
+#response code{
+  background:#0f3460;padding:2px 6px;border-radius:4px;font-size:14px;
+}
+#response pre{
+  background:#0f3460;padding:12px;border-radius:8px;
+  overflow-x:auto;margin:8px 0;position:relative;
+}
+#response pre code{background:transparent;padding:0}
+.copy-btn{
+  position:absolute;top:6px;right:6px;
+  background:#333;border:none;color:#ccc;
+  border-radius:4px;padding:4px 8px;cursor:pointer;font-size:12px;
+}
+.copy-btn:hover{background:#555}
+/* Settings panel */
+#settings{
+  display:none;background:#16213e;border-radius:10px;padding:20px;
+  flex-direction:column;gap:16px;
+}
+#settings.open{display:flex}
+#settings h3{font-size:14px;color:#888;text-transform:uppercase;letter-spacing:1px}
+#settings label{font-size:13px;color:#aaa;display:block;margin-bottom:4px}
+#settings input[type=text],#settings input[type=password],#settings textarea{
+  width:100%;padding:8px 12px;border:1px solid #333;border-radius:6px;
+  background:#1a1a2e;color:#e0e0e0;font-size:14px;font-family:inherit;
+}
+#settings textarea{min-height:60px;resize:vertical}
+.cmd-row{
+  display:grid;grid-template-columns:60px 100px 1fr 36px;gap:8px;align-items:start;
+  margin-bottom:8px;
+}
+.cmd-row input,.cmd-row textarea{width:100%}
+.del-btn{
+  background:none;border:none;color:#e94560;font-size:18px;cursor:pointer;
+  padding:4px;align-self:center;
+}
+.del-btn:disabled{color:#333;cursor:default}
+#add-cmd-btn,#save-btn{
+  padding:8px 16px;border:none;border-radius:6px;cursor:pointer;
+  font-size:14px;
+}
+#add-cmd-btn{background:#0f3460;color:#e0e0e0}
+#save-btn{background:#e94560;color:#fff;font-weight:600}
+#save-msg{font-size:13px;color:#4ecca3;display:none;margin-left:8px}
+/* Key status */
+.key-status{font-size:11px;margin-top:2px}
+.key-ok{color:#4ecca3}
+.key-missing{color:#e94560}
+/* Setup banner */
+#setup-banner{
+  background:#e94560;color:#fff;padding:12px 16px;border-radius:10px;
+  font-size:14px;cursor:pointer;text-align:center;
+}
+#setup-banner:hover{background:#d63851}
+/* Spinner */
+.spinner{
+  display:inline-block;width:18px;height:18px;
+  border:2px solid #333;border-top-color:#e94560;border-radius:50%;
+  animation:spin .6s linear infinite;vertical-align:middle;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* Responsive */
+@media(max-width:480px){
+  body{padding:12px 8px}
+  #q{font-size:16px;padding:10px 12px}
+  .cmd-row{grid-template-columns:50px 80px 1fr 30px;gap:4px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="setup-banner" style="display:none" onclick="document.getElementById('settings').classList.add('open');this.style.display='none'">
+    Welcome to Trivi! Tap here to enter your API keys to get started.
+  </div>
+
+  <div id="input-row">
+    <input type="text" id="q" placeholder="Type here..." autocomplete="off" autofocus>
+    <button id="mic-btn" title="Hold to speak">&#x1F3A4;</button>
+    <button id="settings-btn" title="Settings">&#x2699;&#xFE0F;</button>
+  </div>
+  <div id="mode-badge"></div>
+  <div id="response"></div>
+
+  <!-- Settings panel -->
+  <div id="settings">
+    <h3>API Keys</h3>
+    <div>
+      <label for="gemini-key">Gemini API Key</label>
+      <input type="password" id="gemini-key" placeholder="AIza...">
+      <div class="key-status" id="gemini-status"></div>
+    </div>
+    <div>
+      <label for="openai-key">OpenAI API Key (optional fallback)</label>
+      <input type="password" id="openai-key" placeholder="sk-...">
+      <div class="key-status" id="openai-status"></div>
+    </div>
+
+    <h3>Translation</h3>
+    <div>
+      <label for="src-lang">Source language</label>
+      <input type="text" id="src-lang" value="English">
+    </div>
+    <div>
+      <label for="tgt-langs">Target languages (comma-separated)</label>
+      <input type="text" id="tgt-langs" value="German, Ukrainian">
+    </div>
+
+    <h3>Commands</h3>
+    <div id="cmd-list"></div>
+    <button id="add-cmd-btn">+ Add command</button>
+
+    <div style="display:flex;align-items:center;margin-top:8px">
+      <button id="save-btn">Save</button>
+      <span id="save-msg">Saved &#x2713;</span>
+    </div>
+  </div>
+  <div style="text-align:center;padding:16px 0 4px;font-size:11px;color:#555">
+    <a href="https://github.com/litai-solutions" style="color:#555;text-decoration:none">made by litai</a>
+  </div>
+</div>
+
+<script>
+(function(){
+  // --- Storage helpers ---
+  const STORAGE_KEY = 'trivi_config';
+
+  const DEFAULT_CONFIG = {
+    geminiKey: '',
+    openaiKey: '',
+    translation: { source: 'English', targets: 'German, Ukrainian' },
+    commands: [
+      { prefix: 'e', full_prefix: 'explain', label: 'Explain',
+        prompt: 'Explain the following concept in 3-6 sentences. Be clear and concise. No preamble. Use short paragraphs or bullets for readability. Important: Never answer in Russian. If a Slavic language is needed, use Ukrainian only.',
+        deletable: false },
+      { prefix: 'c', full_prefix: 'command', label: 'Command',
+        prompt: 'Give the bash or python command for this task. No preamble, no explanation, no comments. Just the command.',
+        deletable: false },
+      { prefix: 'q', full_prefix: 'question', label: 'Question',
+        prompt: 'Answer this question directly and concisely. No preamble, no hedging. Just the answer. Important: Never answer in Russian. If a Slavic language is needed, use Ukrainian only.',
+        deletable: false },
+    ],
+  };
+
+  function loadConfig() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        // Merge with defaults for any missing fields
+        return { ...DEFAULT_CONFIG, ...saved };
+      }
+    } catch(e) {}
+    return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  }
+
+  function saveConfig(cfg) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
+  }
+
+  let cfg = loadConfig();
+
+  // --- DOM refs ---
+  const qInput = document.getElementById('q');
+  const micBtn = document.getElementById('mic-btn');
+  const settingsBtn = document.getElementById('settings-btn');
+  const settingsPanel = document.getElementById('settings');
+  const responseDiv = document.getElementById('response');
+  const modeBadge = document.getElementById('mode-badge');
+  const cmdList = document.getElementById('cmd-list');
+  const addCmdBtn = document.getElementById('add-cmd-btn');
+  const saveBtn = document.getElementById('save-btn');
+  const saveMsg = document.getElementById('save-msg');
+  const srcLang = document.getElementById('src-lang');
+  const tgtLangs = document.getElementById('tgt-langs');
+  const geminiKeyInput = document.getElementById('gemini-key');
+  const openaiKeyInput = document.getElementById('openai-key');
+  const geminiStatus = document.getElementById('gemini-status');
+  const openaiStatus = document.getElementById('openai-status');
+  const setupBanner = document.getElementById('setup-banner');
+
+  let busy = false;
+
+  // --- First-run detection ---
+  function checkFirstRun() {
+    if (!cfg.geminiKey && !cfg.openaiKey) {
+      setupBanner.style.display = 'block';
+    }
+    updateKeyStatus();
+  }
+
+  function updateKeyStatus() {
+    if (cfg.geminiKey) {
+      geminiStatus.textContent = 'Key saved';
+      geminiStatus.className = 'key-status key-ok';
+    } else {
+      geminiStatus.textContent = 'Required — get one free at aistudio.google.com';
+      geminiStatus.className = 'key-status key-missing';
+    }
+    if (cfg.openaiKey) {
+      openaiStatus.textContent = 'Key saved';
+      openaiStatus.className = 'key-status key-ok';
+    } else {
+      openaiStatus.textContent = 'Optional — used as fallback if Gemini fails';
+      openaiStatus.className = 'key-status key-missing';
+    }
+  }
+
+  // --- Focus management ---
+  window.addEventListener('focus', () => { qInput.focus(); qInput.select(); });
+  qInput.addEventListener('focus', () => qInput.select());
+
+  // --- Apply config to UI ---
+  function applyConfig() {
+    srcLang.value = cfg.translation?.source || 'English';
+    tgtLangs.value = cfg.translation?.targets || 'German, Ukrainian';
+    geminiKeyInput.value = cfg.geminiKey || '';
+    openaiKeyInput.value = cfg.openaiKey || '';
+    renderCommands();
+    updateKeyStatus();
+  }
+
+  function renderCommands() {
+    cmdList.innerHTML = '';
+    (cfg.commands || []).forEach((cmd, i) => {
+      const row = document.createElement('div');
+      row.className = 'cmd-row';
+      row.innerHTML =
+        `<input type="text" value="${esc(cmd.prefix)}" data-i="${i}" data-f="prefix" ${cmd.deletable===false?'readonly':''}>` +
+        `<input type="text" value="${esc(cmd.label)}" data-i="${i}" data-f="label">` +
+        `<textarea data-i="${i}" data-f="prompt">${esc(cmd.prompt)}</textarea>` +
+        `<button class="del-btn" data-i="${i}" ${cmd.deletable===false?'disabled':''}>&times;</button>`;
+      cmdList.appendChild(row);
+    });
+    cmdList.querySelectorAll('input,textarea').forEach(el => {
+      el.addEventListener('input', () => {
+        const i = +el.dataset.i, f = el.dataset.f;
+        cfg.commands[i][f] = el.value;
+      });
+    });
+    cmdList.querySelectorAll('.del-btn').forEach(el => {
+      el.addEventListener('click', () => {
+        const i = +el.dataset.i;
+        if (cfg.commands[i].deletable !== false) {
+          cfg.commands.splice(i, 1);
+          renderCommands();
+        }
+      });
+    });
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // --- Settings toggle ---
+  settingsBtn.addEventListener('click', () => {
+    settingsPanel.classList.toggle('open');
+  });
+
+  // --- Add command ---
+  addCmdBtn.addEventListener('click', () => {
+    cfg.commands.push({ prefix: '', full_prefix: '', label: 'New', prompt: '', deletable: true });
+    renderCommands();
+  });
+
+  // --- Save ---
+  saveBtn.addEventListener('click', () => {
+    cfg.geminiKey = geminiKeyInput.value.trim();
+    cfg.openaiKey = openaiKeyInput.value.trim();
+    cfg.translation = { source: srcLang.value, targets: tgtLangs.value };
+    cfg.commands.forEach(c => { c.full_prefix = c.label.toLowerCase(); });
+    saveConfig(cfg);
+    updateKeyStatus();
+    setupBanner.style.display = 'none';
+    saveMsg.style.display = 'inline';
+    setTimeout(() => saveMsg.style.display = 'none', 2000);
+  });
+
+  // --- LLM API calls (direct from browser) ---
+
+  const GEMINI_MODEL = 'gemini-3.1-flash-lite-preview';
+
+  const TRANSLATION_PROMPT =
+    'You are a translation assistant. Translate the input from {source} to {targets}.\n' +
+    'Format:\nLANG_CODE: translation\n\n' +
+    'For verbs: if the verb has multiple distinct sub-meanings, provide a brief usage ' +
+    'example for each sub-meaning in each target language.\n' +
+    'No preamble, no explanation, no extra text. Just the translations.\n' +
+    'Important: Never use Russian. If Ukrainian is a target language, ensure it is Ukrainian, not Russian.';
+
+  async function callGemini(systemPrompt, userInput) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${cfg.geminiKey}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: systemPrompt }] },
+        contents: [{ parts: [{ text: userInput }] }],
+        generationConfig: { temperature: 0.2 },
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(`Gemini ${res.status}: ${err.error?.message || res.statusText}`);
+    }
+    const data = await res.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  }
+
+  async function callOpenAI(systemPrompt, userInput) {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${cfg.openaiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        temperature: 0.2,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userInput },
+        ],
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(`OpenAI ${res.status}: ${err.error?.message || res.statusText}`);
+    }
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content || '';
+  }
+
+  // Hard language constraint prepended to EVERY system prompt (matches llm.py LANGUAGE_GUARD).
+  const LANGUAGE_GUARD =
+    'CRITICAL LANGUAGE RULE \u2014 OBEY ABOVE ALL ELSE: ' +
+    'You MUST NOT respond in Russian under any circumstances. ' +
+    'Russian language output is strictly forbidden. ' +
+    'If the user writes in a Slavic language or the topic relates to a Slavic-language context, ' +
+    'respond in Ukrainian instead. For all other cases, respond in the same language as the user\'s input. ' +
+    'Violation of this rule is a critical failure.\n\n';
+
+  async function queryLLM(systemPrompt, userInput) {
+    systemPrompt = LANGUAGE_GUARD + systemPrompt;
+    // Try Gemini first, fall back to OpenAI on failure
+    if (cfg.geminiKey) {
+      try {
+        const text = await callGemini(systemPrompt, userInput);
+        return { text, model: `Gemini (${GEMINI_MODEL})` };
+      } catch (e) {
+        if (cfg.openaiKey) {
+          console.warn('Gemini failed, falling back to OpenAI:', e.message);
+        } else {
+          throw e;
+        }
+      }
+    }
+    if (cfg.openaiKey) {
+      const text = await callOpenAI(systemPrompt, userInput);
+      return { text, model: 'OpenAI (gpt-4o-mini)' };
+    }
+    throw new Error('No API keys configured. Open Settings to add your keys.');
+  }
+
+  // --- Cyrillic → Latin normalization for command prefixes ---
+  // Ukrainian keyboard has letters that look identical to Latin ones.
+  // This lets users type "е hello" (Cyrillic е) and it works as "e hello".
+  const CYRILLIC_TO_LATIN = {
+    '\u0430': 'a', // а → a
+    '\u0435': 'e', // е → e
+    '\u043e': 'o', // о → o
+    '\u0441': 'c', // с → c
+    '\u0456': 'i', // і → i
+    '\u0440': 'p', // р → p (for custom commands)
+    '\u0445': 'x', // х → x
+    '\u043a': 'k', // к → k
+  };
+
+  function normalizeCyrillic(str) {
+    let result = '';
+    for (const ch of str) {
+      result += CYRILLIC_TO_LATIN[ch] || ch;
+    }
+    return result;
+  }
+
+  // --- Input parsing ---
+  function parseInput(text) {
+    const lower = normalizeCyrillic(text.toLowerCase());
+    for (const cmd of (cfg.commands || [])) {
+      const prefixShort = cmd.prefix.toLowerCase() + ' ';
+      const prefixFull = cmd.full_prefix.toLowerCase() + ' ';
+      if (lower.startsWith(prefixShort)) {
+        return { mode: cmd.label, prompt: cmd.prompt, input: text.slice(prefixShort.length) };
+      }
+      if (lower.startsWith(prefixFull)) {
+        return { mode: cmd.label, prompt: cmd.prompt, input: text.slice(prefixFull.length) };
+      }
+    }
+    return { mode: 'Translation', prompt: '', input: text };
+  }
+
+  // --- Ask ---
+  qInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitQuery(); }
+  });
+
+  async function submitQuery() {
+    const text = qInput.value.trim();
+    if (!text || busy) return;
+
+    if (!cfg.geminiKey && !cfg.openaiKey) {
+      setupBanner.style.display = 'block';
+      return;
+    }
+
+    busy = true;
+    responseDiv.style.display = 'block';
+    responseDiv.innerHTML = '<span class="spinner"></span>';
+    modeBadge.textContent = '';
+
+    try {
+      let { mode, prompt, input } = parseInput(text);
+
+      if (mode === 'Translation') {
+        const src = cfg.translation?.source || 'English';
+        const tgts = cfg.translation?.targets || 'German, Ukrainian';
+        prompt = TRANSLATION_PROMPT.replace('{source}', src).replace('{targets}', tgts);
+      }
+
+      // If user typed in Cyrillic (Explain/Question), nudge LLM toward Ukrainian
+      if ((mode === 'Explain' || mode === 'Question') && /[\u0400-\u04FF]/.test(input)) {
+        input = input + ' (\u0432\u0456\u0434\u043f\u043e\u0432\u0456\u0434\u0430\u0439 \u0443\u043a\u0440\u0430\u0457\u043d\u0441\u044c\u043a\u043e\u044e!)';
+      }
+
+      const result = await queryLLM(prompt, input);
+      modeBadge.textContent = `${mode} \u2022 ${result.model}`;
+      renderResponse(result.text);
+    } catch (e) {
+      responseDiv.textContent = e.message || 'Error';
+    } finally {
+      busy = false;
+      qInput.value = '';
+      qInput.focus();
+    }
+  }
+
+  function renderResponse(text) {
+    const readableText = formatPlainTextForReadability(text);
+    let html = esc(readableText);
+    html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
+      return `<pre><code>${code.trim()}</code></pre>`;
+    });
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    responseDiv.innerHTML = html;
+    responseDiv.querySelectorAll('pre').forEach(pre => {
+      const btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', () => {
+        const raw = pre.querySelector('code')?.textContent || pre.textContent;
+        const code = extractCommandOnly(raw);
+        navigator.clipboard.writeText(code).then(() => {
+          btn.textContent = '\u2713';
+          setTimeout(() => btn.textContent = 'Copy', 1500);
+        });
+      });
+      pre.style.position = 'relative';
+      pre.appendChild(btn);
+    });
+  }
+
+  function formatPlainTextForReadability(raw) {
+    const s = String(raw || '').trim();
+    if (!s) return s;
+    if (s.includes('```') || s.includes('\n')) return s;
+    const parts = s.match(/[^.!?]+[.!?]+(?:\s|$)|[^.!?]+$/g) || [s];
+    const sentences = parts.map(p => p.trim()).filter(Boolean);
+    if (sentences.length >= 3) return sentences.join('\n\n');
+    return s;
+  }
+
+  function extractCommandOnly(raw) {
+    const lines = String(raw).replace(/\r\n/g, '\n').split('\n');
+    const out = [];
+    for (const line of lines) {
+      let t = line.trim();
+      if (!t) continue;
+      if (t.startsWith('#') || t.startsWith('//') || t.toLowerCase().startsWith('rem ')) continue;
+      t = t.replace(/^\$\s+/, '').replace(/^>\s+/, '');
+      t = t.replace(/\s+#.*$/, '').trim();
+      if (t) out.push(t);
+    }
+    return (out.join('\n').trim()) || String(raw).trim();
+  }
+
+  // --- Voice input ---
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognition = null;
+  let recognizing = false;
+
+  if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = e => {
+      const t = e.results[0][0].transcript;
+      qInput.value = t;
+      stopRecognition();
+      submitQuery();
+    };
+    recognition.onerror = () => stopRecognition();
+    recognition.onend = () => stopRecognition();
+  }
+
+  function startRecognition() {
+    if (!recognition || recognizing) return;
+    recognizing = true;
+    micBtn.classList.add('active');
+    recognition.start();
+  }
+
+  function stopRecognition() {
+    if (!recognition || !recognizing) return;
+    recognizing = false;
+    micBtn.classList.remove('active');
+    try { recognition.stop(); } catch(e) {}
+  }
+
+  micBtn.addEventListener('mousedown', startRecognition);
+  micBtn.addEventListener('mouseup', stopRecognition);
+  micBtn.addEventListener('touchstart', e => { e.preventDefault(); startRecognition(); });
+  micBtn.addEventListener('touchend', e => { e.preventDefault(); stopRecognition(); });
+
+  // --- PWA service worker ---
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+
+  // --- Init ---
+  applyConfig();
+  checkFirstRun();
+})();
+</script>
+</body>
+</html>
