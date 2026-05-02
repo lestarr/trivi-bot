@@ -331,11 +331,23 @@ body{
   const GEMINI_MODEL = 'gemini-3.1-flash-lite-preview';
 
   const TRANSLATION_PROMPT =
-    'You are a translation assistant. Translate the input from {source} to {targets}.\n' +
-    'Format:\nLANG_CODE: translation\n\n' +
-    'For verbs: if the verb has multiple distinct sub-meanings, provide a brief usage ' +
-    'example for each sub-meaning in each target language.\n' +
-    'No preamble, no explanation, no extra text. Just the translations.\n' +
+    'You are a translation assistant. Translate the input from {source} to {targets}.\n\n' +
+    'Format STRICTLY as follows. Use the language emoji flag (🇩🇪 for DE, 🇺🇦 for UK, ' +
+    '🇫🇷 for FR, 🇪🇸 for ES, 🇮🇹 for IT, 🇵🇱 for PL, 🇵🇹 for PT, 🇳🇱 for NL, 🇷🇺 forbidden) ' +
+    'followed by the language code on a single header line, exactly once per language. ' +
+    'Do NOT repeat the header line for additional meanings.\n\n' +
+    'Template:\n' +
+    '🇩🇪 DE\n' +
+    'translation_word_1\n' +
+    '- short definition: "example sentence."\n' +
+    'translation_word_2\n' +
+    '- short definition: "example sentence."\n\n' +
+    '🇺🇦 UK\n' +
+    'translation_word_1\n' +
+    '- short definition: "example sentence."\n\n' +
+    'For verbs with multiple distinct sub-meanings, list each sub-meaning under the same ' +
+    'language header. For nouns and other words, usually one translation is enough.\n\n' +
+    'No preamble, no explanation, no model name, no extra text. Just the formatted translations.\n' +
     'Important: Never use Russian. If Ukrainian is a target language, ensure it is Ukrainian, not Russian.';
 
   async function callGemini(systemPrompt, userInput) {
