@@ -26,7 +26,7 @@ No chat threads. No scrolling. No context switching. No accounts.
 
 **It does four things:**
 
-> [SCREENSHOT: Main input screen — clean, dark, single input field]
+![Main input screen](../docs/screenshots/main-input.png)
 
 ### Translate
 
@@ -34,9 +34,9 @@ Just type any word or phrase. Trivi translates it to **all your languages at onc
 
 This was my original motivation. I'm bilingual — Ukrainian and German — and when I hit a tricky English expression, I need it in both languages to really get it. I used to type "translate to de and ukr" into my AI chat every single time. Now it's automated: type the word, hit Enter, get both translations instantly. You configure your target languages once in Settings, and every lookup just works.
 
-No prefix needed — translation is the default mode. Type "deployability", get German and Ukrainian side by side in half a second.
+No prefix needed — translation is the default mode. Type "deploy", get German and Ukrainian side by side in half a second.
 
-> [SCREENSHOT: Translation result — showing word with multiple language outputs]
+![Translation result](../docs/screenshots/translation-result.png)
 
 ### Explain
 
@@ -44,7 +44,7 @@ Type **e** + your question. Get a clear 3-6 sentence explanation. Not a lecture 
 
 `e what is a reverse proxy`
 
-> [SCREENSHOT: Explain result — clean, concise explanation]
+![Explain result](../docs/screenshots/explain-result.png)
 
 ### Command
 
@@ -52,7 +52,7 @@ Type **c** + what you need. Get the bash or Python command. Nothing else. Copy i
 
 `c find all files larger than 100mb`
 
-> [SCREENSHOT: Command result — showing command with copy button]
+![Command result](../docs/screenshots/command-result.png)
 
 ### Question
 
@@ -60,7 +60,7 @@ Type **q** + anything. Get a direct answer. No preamble, no hedging.
 
 `q capital of Uzbekistan`
 
-> [SCREENSHOT: Question result — short direct answer]
+![Question result](../docs/screenshots/question-result.png)
 
 ---
 
@@ -72,7 +72,7 @@ The magic is **friction removal.**
 
 Opening a translator takes 5-8 seconds of context switching. That's enough for your brain to decide "not worth it." Trivi takes under 1 second — tap the app, type, Enter, done. That tiny difference changes behavior: you actually look things up instead of skipping them.
 
-I noticed it in myself after a week: I was translating words I would have skipped before. My reading comprehension in German texts genuinely improved — not because of better AI, but because I stopped ignoring gaps.
+I noticed it in myself after a week: I was translating words I would have skipped before. My reading comprehension in English texts genuinely improved  because I stopped ignoring gaps.
 
 ---
 
@@ -86,7 +86,7 @@ Some ideas:
 - **d** → Define: "Give the dictionary definition, etymology, and one example sentence"
 - **r** → Rewrite: "Rewrite this more concisely"
 
-> [SCREENSHOT: Settings panel showing custom command being added]
+![Settings — custom commands](../docs/screenshots/settings-custom-command.png)
 
 Your commands, your prompts, your shortcuts.
 
@@ -102,7 +102,7 @@ Your commands, your prompts, your shortcuts.
 4. Click **"Create API Key"**
 5. Copy the key (starts with `AIza...`)
 
-> [SCREENSHOT: Google AI Studio — Get API Key page]
+![Google AI Studio — API Keys](../docs/screenshots/google-apikey.png)
 
 The free tier gives you ~15 requests per minute. More than enough.
 
@@ -118,7 +118,7 @@ Go to: **[YOUR TRIVI URL]**
 4. Set your translation languages
 5. Tap **Save**
 
-> [SCREENSHOT: Settings panel with API key field filled]
+![Settings — API keys](../docs/screenshots/settings-api-keys.png)
 
 ### 4. Install as App (Recommended)
 
@@ -127,8 +127,6 @@ Go to: **[YOUR TRIVI URL]**
 **On Mac/PC:** Chrome → address bar install icon
 
 Now Trivi is one tap away. Always.
-
-> [SCREENSHOT: Trivi icon on a phone home screen]
 
 ---
 
@@ -139,6 +137,7 @@ Now Trivi is one tap away. Always.
 - **Works offline** (app shell loads from cache; API calls need internet).
 - **Cyrillic keyboard support.** Ukrainian `е` works as `e`, `с` as `c` — no keyboard switching needed.
 - **20KB total.** The whole app is smaller than a single photo.
+- **Open source.** [Source code on GitHub](https://github.com/litai-solutions/trivi-bot) — nothing hidden.
 
 ---
 

@@ -1,5 +1,11 @@
+.DS_Store
+*.log
 .env
-data/
+.venv
+
+# Demo-video build artifacts
+demo-video/node_modules/
+demo-video/out/*.mp4
+!demo-video/out/trivi-demo.mp4
 __pycache__/
-*.pyc
-.venv/
+data/

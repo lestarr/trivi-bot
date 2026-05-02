@@ -124,7 +124,7 @@ body{
   </div>
 
   <div id="input-row">
-    <input type="text" id="q" placeholder="Type here..." autocomplete="off" autofocus>
+    <input type="text" id="q" placeholder="Type here..." autocomplete="off" autocapitalize="off" autofocus>
     <button id="mic-btn" title="Hold to speak">&#x1F3A4;</button>
     <button id="settings-btn" title="Settings">&#x2699;&#xFE0F;</button>
   </div>
@@ -490,7 +490,6 @@ body{
       responseDiv.textContent = e.message || 'Error';
     } finally {
       busy = false;
-      qInput.value = '';
       qInput.focus();
     }
   }
@@ -550,11 +549,24 @@ body{
   let recognition = null;
   let recognizing = false;
 
-  if (SpeechRecognition) {
+  const LANG_MAP = {
+    english: 'en-US', deutsch: 'de-DE', german: 'de-DE',
+    ukrainian: 'uk-UA', українська: 'uk-UA', українська_мова: 'uk-UA',
+    russian: 'ru-RU', russisch: 'ru-RU',
+    spanish: 'es-ES', french: 'fr-FR', italian: 'it-IT',
+    polish: 'pl-PL', portuguese: 'pt-PT', dutch: 'nl-NL'
+  };
+  function resolveLang() {
+    const raw = (srcLang.value || 'English').trim().toLowerCase();
+    return LANG_MAP[raw] || (raw.length === 2 ? raw : 'en-US');
+  }
+
+  if (!SpeechRecognition || !window.isSecureContext) {
+    micBtn.style.display = 'none';
+  } else {
     recognition = new SpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = false;
-    recognition.lang = 'en-US';
 
     recognition.onresult = e => {
       const t = e.results[0][0].transcript;
@@ -562,7 +574,14 @@ body{
       stopRecognition();
       submitQuery();
     };
-    recognition.onerror = () => stopRecognition();
+    recognition.onerror = e => {
+      stopRecognition();
+      const msg = e.error === 'not-allowed' ? 'Microphone permission denied'
+        : e.error === 'no-speech' ? 'No speech detected'
+        : 'Mic error: ' + e.error;
+      responseDiv.textContent = msg;
+      responseDiv.style.display = 'block';
+    };
     recognition.onend = () => stopRecognition();
   }
 
@@ -570,7 +589,14 @@ body{
     if (!recognition || recognizing) return;
     recognizing = true;
     micBtn.classList.add('active');
-    recognition.start();
+    try {
+      recognition.lang = resolveLang();
+      recognition.start();
+    } catch (err) {
+      stopRecognition();
+      responseDiv.textContent = 'Mic start failed: ' + err.message;
+      responseDiv.style.display = 'block';
+    }
   }
 
   function stopRecognition() {
@@ -580,10 +606,12 @@ body{
     try { recognition.stop(); } catch(e) {}
   }
 
-  micBtn.addEventListener('mousedown', startRecognition);
-  micBtn.addEventListener('mouseup', stopRecognition);
-  micBtn.addEventListener('touchstart', e => { e.preventDefault(); startRecognition(); });
-  micBtn.addEventListener('touchend', e => { e.preventDefault(); stopRecognition(); });
+  // Click-to-toggle (more reliable than hold, especially on mobile)
+  micBtn.addEventListener('click', e => {
+    e.preventDefault();
+    if (recognizing) stopRecognition(); else startRecognition();
+  });
+  micBtn.title = 'Click to speak';
 
   // --- PWA service worker ---
   if ('serviceWorker' in navigator) {
