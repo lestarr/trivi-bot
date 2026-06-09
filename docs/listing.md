@@ -29,4 +29,4 @@ Add your own custom commands in Settings. 20KB total. Works on any device.
 
 ---
 
-*Built by [litai](https://github.com/litai-solutions)*
+*Built by [litai](http://litai-solutions.com/)*

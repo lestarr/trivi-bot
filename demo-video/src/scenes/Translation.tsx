@@ -48,7 +48,7 @@ export const Translation: React.FC = () => {
           pointerEvents: 'none',
         }}
       >
-        Type any word — get translations with usage examples.
+        Введіть будь-яке слово — отримайте переклад із прикладами вживання.
       </div>
 
       <div style={{ paddingTop: 180 }}>

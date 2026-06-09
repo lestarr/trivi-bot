@@ -105,7 +105,7 @@ export const SettingsIntro: React.FC = () => {
           fontWeight: 600,
         }}
       >
-        ↑ Settings
+        ↑ Налаштування
       </div>
 
       {/* Body text */}
@@ -121,7 +121,7 @@ export const SettingsIntro: React.FC = () => {
         }}
       >
         <div style={{ fontSize: 48, fontWeight: 500, marginBottom: 60 }}>
-          Open Settings to:
+          Відкрийте налаштування, щоб:
         </div>
         <div
           style={{
@@ -132,7 +132,7 @@ export const SettingsIntro: React.FC = () => {
             marginBottom: 28,
           }}
         >
-          🔑  add your API keys
+          🔑  додати свої API-ключі
         </div>
         <div
           style={{
@@ -142,7 +142,7 @@ export const SettingsIntro: React.FC = () => {
             transform: `translateY(${(1 - item2) * 16}px)`,
           }}
         >
-          ➕  add your own commands
+          ➕  додати власні команди
         </div>
       </div>
     </AbsoluteFill>

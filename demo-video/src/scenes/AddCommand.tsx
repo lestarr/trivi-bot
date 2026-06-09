@@ -11,8 +11,8 @@ const SettingsPanel: React.FC = () => {
   const panelOpacity = interpolate(frame, [0, 20], [0, 1], { extrapolateRight: 'clamp' });
 
   const prefix = typedSlice('s', frame, 30, 0.4);
-  const label = typedSlice('Summary', frame, 50, 0.5);
-  const prompt = typedSlice('Summarize the following text in 3 bullet points.', frame, 90, 1.4);
+  const label = typedSlice('Підсумок', frame, 50, 0.5);
+  const prompt = typedSlice('Підсумуй цей текст у 3 коротких пунктах.', frame, 90, 1.4);
 
   const saveFlash = interpolate(frame, [220, 235, 270], [0, 1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
   const saveScale = interpolate(frame, [220, 235], [1, 1.06], { extrapolateRight: 'clamp' });
@@ -89,7 +89,7 @@ const InputDemo: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const cmd = 's Climate change is the long-term shift in temperatures and weather patterns...';
+  const cmd = 's Зміна клімату — це довгострокова зміна температур і погодних умов...';
   const typed = typedSlice(cmd, frame, 10, 1.3);
   const showCursor = Math.floor(frame / 18) % 2 === 0 && typed.length < cmd.length;
 
@@ -103,15 +103,15 @@ const InputDemo: React.FC = () => {
       <AppMock
         inputText={typed}
         showCursor={showCursor}
-        modeBadge={typed.startsWith('s') ? 'Summary' : ''}
+        modeBadge={typed.startsWith('s') ? 'Підсумок' : ''}
         responseScale={responseScale}
         responseOpacity={responseOpacity}
       >
         {frame > responseStart && (
           <ul style={{ fontSize: 24, lineHeight: 1.7, paddingLeft: 28, listStyle: 'none' }}>
-            <li>• Long-term shifts in global temperatures, primarily driven by human activity since the 1800s.</li>
-            <li>• Burning fossil fuels releases greenhouse gases that trap heat in Earth's atmosphere.</li>
-            <li>• Effects include rising sea levels, extreme weather, and ecosystem disruption.</li>
+            <li>• Довгострокові зміни глобальних температур, спричинені переважно діяльністю людини з 1800-х років.</li>
+            <li>• Спалювання викопного палива викидає парникові гази, які затримують тепло в атмосфері.</li>
+            <li>• Наслідки — підвищення рівня моря, екстремальна погода та руйнування екосистем.</li>
           </ul>
         )}
       </AppMock>
@@ -156,7 +156,7 @@ export const AddCommand: React.FC = () => {
           pointerEvents: 'none',
         }}
       >
-        Add your own commands in seconds.
+        Додавайте власні команди за секунди.
       </div>
 
       <Sequence from={90} durationInFrames={290} layout="none">

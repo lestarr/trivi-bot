@@ -53,7 +53,7 @@ export const Explain: React.FC = () => {
         }}
       >
         <span>
-          Prefix <code style={{ background: THEME.cardAlt, padding: '4px 16px', borderRadius: 8, color: THEME.green }}>e</code> for instant explanations.
+          Префікс <code style={{ background: THEME.cardAlt, padding: '4px 16px', borderRadius: 8, color: THEME.green }}>e</code> — миттєві пояснення.
         </span>
       </div>
 

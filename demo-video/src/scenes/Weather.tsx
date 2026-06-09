@@ -49,7 +49,7 @@ export const Weather: React.FC = () => {
         }}
       >
         <span>
-          Or <code style={{ background: THEME.cardAlt, padding: '4px 16px', borderRadius: 8, color: THEME.green }}>w</code> for tomorrow's weather.
+          Або <code style={{ background: THEME.cardAlt, padding: '4px 16px', borderRadius: 8, color: THEME.green }}>w</code> — погода на завтра.
         </span>
       </div>
 

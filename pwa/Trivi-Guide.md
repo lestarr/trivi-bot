@@ -1,155 +1,147 @@
-# Trivi — Your Side-Brain for Trivial Tasks
+# Trivi — a tiny app for quick questions
+
+## What Trivi does
+
+Trivi is a small app you keep on your phone or laptop. One tap opens it. You type one thing and get an answer:
+
+1. Translate a word into your languages — all at once.
+2. Explain a concept, phrase, or topic in 3–6 short sentences.
+3. Answer a quick question with just the answer.
+
+You can also add your own commands (we'll come back to that).
+
+![Main input](../docs/screenshots/main-input.png)
 
 ---
 
-## The Problem
+## Step 1 — Get a free Google key
 
-You're deep in a conversation with ChatGPT, debugging code, or reading an article. You hit an unfamiliar word. A term you half-know. A bash command you can't quite remember.
+Trivi uses Google's AI to answer your questions. To do that, you need a "key" — a long string Google gives you for free. No credit card. Free for normal use.
 
-What do you do?
+1. Open `aistudio.google.com` in your browser.
+2. Sign in with any Google account.
+3. Click **Get API Key** in the left sidebar.
+4. Click **Create API Key**.
+5. Copy the key (it starts with `AIza…`). Keep this tab open — you'll paste the key in a moment.
 
-- Open a new browser tab → go to Google Translate → type the word → get the answer → switch back. Friction. Context switching.
-- Ask your AI chat → it answers in 3 paragraphs → now you have to scroll past it to find where you were. Thread polluted.
-- Or — and this is what most of us actually do — **you skip it.** You move on. You tell yourself you'll look it up later. You won't.
-
-Every skipped word is a small hole in your understanding. One is fine. Ten in an article? You're reading the surface.
-
-I built Trivi because I was tired of skipping.
+![Google AI Studio — API key](../docs/screenshots/google-apikey.png)
 
 ---
 
-## What Trivi Is
+## Step 2 — Open Trivi and paste the key
 
-Trivi is a tiny app that lives on your phone or desktop — always one tap away. You type a word, a question, or a command prefix, hit Enter, and get an instant answer. Then you go back to what you were doing.
-
-No chat threads. No scrolling. No context switching. No accounts.
-
-**It does four things:**
-
-![Main input screen](../docs/screenshots/main-input.png)
-
-### Translate
-
-Just type any word or phrase. Trivi translates it to **all your languages at once.**
-
-This was my original motivation. I'm bilingual — Ukrainian and German — and when I hit a tricky English expression, I need it in both languages to really get it. I used to type "translate to de and ukr" into my AI chat every single time. Now it's automated: type the word, hit Enter, get both translations instantly. You configure your target languages once in Settings, and every lookup just works.
-
-No prefix needed — translation is the default mode. Type "deploy", get German and Ukrainian side by side in half a second.
-
-![Translation result](../docs/screenshots/translation-result.png)
-
-### Explain
-
-Type **e** + your question. Get a clear 3-6 sentence explanation. Not a lecture — just enough to understand and move on.
-
-`e what is a reverse proxy`
-
-![Explain result](../docs/screenshots/explain-result.png)
-
-### Command
-
-Type **c** + what you need. Get the bash or Python command. Nothing else. Copy it and go.
-
-`c find all files larger than 100mb`
-
-![Command result](../docs/screenshots/command-result.png)
-
-### Question
-
-Type **q** + anything. Get a direct answer. No preamble, no hedging.
-
-`q capital of Uzbekistan`
-
-![Question result](../docs/screenshots/question-result.png)
-
----
-
-## Why It Works
-
-The magic isn't the AI. The AI is the same Gemini or ChatGPT you already use.
-
-The magic is **friction removal.**
-
-Opening a translator takes 5-8 seconds of context switching. That's enough for your brain to decide "not worth it." Trivi takes under 1 second — tap the app, type, Enter, done. That tiny difference changes behavior: you actually look things up instead of skipping them.
-
-I noticed it in myself after a week: I was translating words I would have skipped before. My reading comprehension in English texts genuinely improved  because I stopped ignoring gaps.
-
----
-
-## You Can Expand It
-
-The four built-in modes are just the start. Open Settings and add your own command prefixes with custom prompts.
-
-Some ideas:
-- **s** → Summarize: "Summarize this in 2 sentences"
-- **g** → Grammar: "Fix the grammar in this sentence, output only the corrected version"
-- **d** → Define: "Give the dictionary definition, etymology, and one example sentence"
-- **r** → Rewrite: "Rewrite this more concisely"
-
-![Settings — custom commands](../docs/screenshots/settings-custom-command.png)
-
-Your commands, your prompts, your shortcuts.
-
----
-
-## Setup (5 Minutes, Once)
-
-### 1. Get a Free Gemini API Key
-
-1. Go to [aistudio.google.com](https://aistudio.google.com)
-2. Sign in with any Google account
-3. Click **"Get API Key"** in the left sidebar
-4. Click **"Create API Key"**
-5. Copy the key (starts with `AIza...`)
-
-![Google AI Studio — API Keys](../docs/screenshots/google-apikey.png)
-
-The free tier gives you ~15 requests per minute. More than enough.
-
-### 2. Open Trivi
-
-Go to: **[YOUR TRIVI URL]**
-
-### 3. Enter Your Key
-
-1. Tap the gear icon (Settings)
-2. Paste your Gemini API Key
-3. (Optional) Add an OpenAI key as fallback
-4. Set your translation languages
-5. Tap **Save**
+1. Open the Trivi link you got with this purchase.
+2. Tap the gear icon (top right) to open Settings.
+3. Paste your key into the **Gemini API Key** box.
+4. Tap **Save**.
 
 ![Settings — API keys](../docs/screenshots/settings-api-keys.png)
 
-### 4. Install as App (Recommended)
-
-**On iPhone:** Safari → Share → "Add to Home Screen"
-**On Android:** Chrome → Menu → "Add to Home Screen"
-**On Mac/PC:** Chrome → address bar install icon
-
-Now Trivi is one tap away. Always.
+That's it for setup. From now on, Trivi will use this key every time you ask something.
 
 ---
 
-## How It Works (Under the Hood)
+## Step 3 — Pick your languages
 
-- **No accounts.** No sign-up. No data collection.
-- **Your keys, your data.** API keys are stored in your browser only. They go directly to Google/OpenAI — never through our servers. There is no server.
-- **Works offline** (app shell loads from cache; API calls need internet).
-- **Cyrillic keyboard support.** Ukrainian `е` works as `e`, `с` as `c` — no keyboard switching needed.
-- **20KB total.** The whole app is smaller than a single photo.
-- **Open source.** [Source code on GitHub](https://github.com/litai-solutions/trivi-bot) — nothing hidden.
+In Settings, choose:
 
----
+- **Source language** — the language you usually type in (for example, English).
+- **Target languages** — the languages you want answers in. Pick one, two, or five. Examples: German and Ukrainian; or French, Spanish, Polish.
 
-## Quick Reference
+![Settings — languages](../docs/new_docu/3.png)
 
-| Type this | Get this |
-|-----------|----------|
-| `hello` | Translation of "hello" |
-| `e DNS` | Explanation of DNS |
-| `c list docker containers` | The bash command |
-| `q who painted starry night` | Direct answer |
+When you type a word with no command in front of it, Trivi will show that word in every target language at once.
 
 ---
 
-*Built by [litai](https://github.com/litai-solutions) — we build AI tools that work correctly.*
+## Step 4 — Install it like a real app
+
+This step is optional, but recommended — it puts Trivi on your home screen so it opens with one tap.
+
+- **iPhone (Safari):** tap the Share icon → **Add to Home Screen**.
+- **Android (Chrome):** open the menu → **Add to Home Screen**.
+- **Mac / PC (Chrome):** click the small install icon at the right end of the address bar.
+
+Now Trivi behaves like any other app.
+
+---
+
+## Using it day-to-day
+
+### Translate (the default)
+
+Just type a word — no command in front. You'll get translations in all your target languages, with example sentences.
+
+![Translation](../docs/new_docu/2.png)
+
+### Explain — `e`
+
+Type `e` and a space, then your topic.
+
+`e what is a reverse proxy`
+
+You get a 3–6 sentence explanation. Not a lecture.
+
+### Question — `q`
+
+Type `q` and a space, then your question.
+
+`q capital of Lithuania` → `Vilnius`
+
+Just the answer. No "Great question!" or other padding.
+
+### Command (for coders) — `c`
+
+Type `c` and a space, then describe what you want.
+
+`c rename all .txt files to .md`
+
+You get the exact terminal command. Copy and paste.
+
+---
+
+## Adding your own commands
+
+The three letter-commands above (`e`, `q`, `c`) are just the starting point. You can add your own — one letter, one job.
+
+Some ideas:
+
+- `s` — Summarise: *"Summarise the following text in 3 short bullet points."*
+- `f` — Fix grammar: *"Fix the grammar. Return only the corrected sentence."*
+- `p` — Make polite: *"Rewrite this to sound more polite, in the same language."*
+- `d` — Define: *"Give the dictionary definition, etymology, and one example."*
+
+To add one:
+
+1. Open Settings → **Commands**.
+2. Type the letter (the prefix).
+3. Type a label for yourself (e.g. `Summary`).
+4. Type the instruction (the prompt) — what you want the AI to do.
+5. Tap **Save**.
+
+![Custom commands](../docs/new_docu/4.png)
+
+From now on, that letter does that job. Type `s ` followed by any text and you get your summary.
+
+---
+
+## If something goes wrong
+
+- **"Invalid API key" or no answer at all.** Open Settings, check that the key starts with `AIza…` and there are no extra spaces. Save again.
+- **No internet.** Trivi needs internet to reach Google. It cannot answer offline.
+- **Answer in the wrong language.** Open Settings and double-check **Target languages**. Save and try again.
+
+---
+
+## Common questions
+
+- **Do I need an account?** No.
+- **Is there a subscription?** No. One-time payment.
+- **Where do my questions go?** Straight from your browser to Google. Nothing passes through us — there is no server.
+- **Do I need to be technical?** No. If you can copy-paste once, you're set.
+- **Will it work on my phone?** Yes. iPhone, Android, laptop, desktop — anything with a browser.
+- **Is the app honest about my data?** The full source code is on GitHub. You — or any technical friend — can read exactly what it does.
+
+---
+
+*Made by litai. We build small AI tools that just work.*

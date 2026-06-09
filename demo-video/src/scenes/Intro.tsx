@@ -44,7 +44,7 @@ export const Intro: React.FC = () => {
           fontWeight: 300,
         }}
       >
-        Quick answers. No chat clutter.
+        Швидкі відповіді. Без зайвого чату.
       </div>
     </AbsoluteFill>
   );

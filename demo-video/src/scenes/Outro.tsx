@@ -33,7 +33,10 @@ export const Outro: React.FC = () => {
       >
         Triv<span style={{ color: THEME.accent }}>i</span>
       </div>
-      <div
+      <a
+        href="https://halyna4.gumroad.com/l/trivi"
+        target="_blank"
+        rel="noopener noreferrer"
         style={{
           marginTop: 40,
           padding: '20px 48px',
@@ -44,9 +47,23 @@ export const Outro: React.FC = () => {
           fontWeight: 600,
           opacity: ctaOpacity,
           transform: `translateY(${ctaY}px)`,
+          textDecoration: 'none',
+          display: 'inline-block',
         }}
       >
-        Get it on Gumroad →
+        Завантажити на Gumroad →
+      </a>
+      <div
+        style={{
+          marginTop: 18,
+          fontSize: 26,
+          color: THEME.textDim,
+          opacity: ctaOpacity,
+          transform: `translateY(${ctaY}px)`,
+          letterSpacing: 0.5,
+        }}
+      >
+        halyna4.gumroad.com/l/trivi
       </div>
       <div
         style={{

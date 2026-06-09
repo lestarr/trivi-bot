@@ -51,6 +51,7 @@ body{
 #response code{
   background:#0f3460;padding:2px 6px;border-radius:4px;font-size:14px;
 }
+#response strong{font-size:18px;font-weight:700;color:#fff}
 #response pre{
   background:#0f3460;padding:12px;border-radius:8px;
   overflow-x:auto;margin:8px 0;position:relative;
@@ -164,8 +165,11 @@ body{
       <span id="save-msg">Saved &#x2713;</span>
     </div>
   </div>
-  <div style="text-align:center;padding:16px 0 4px;font-size:11px;color:#555">
-    <a href="https://github.com/litai-solutions" style="color:#555;text-decoration:none">made by litai</a>
+  <div style="text-align:center;padding:20px 0 4px;font-size:16px;color:#ddd">
+    <a href="https://github.com/litai-solutions" style="color:#ddd;text-decoration:none;display:inline-flex;align-items:center;gap:14px">
+      <span>made by litai</span>
+      <img src="litai-logo.png" alt="LitAI" style="height:90px;width:auto">
+    </a>
   </div>
 </div>
 
@@ -336,15 +340,18 @@ body{
     '🇫🇷 for FR, 🇪🇸 for ES, 🇮🇹 for IT, 🇵🇱 for PL, 🇵🇹 for PT, 🇳🇱 for NL, 🇷🇺 forbidden) ' +
     'followed by the language code on a single header line, exactly once per language. ' +
     'Do NOT repeat the header line for additional meanings.\n\n' +
-    'Template:\n' +
+    'Template (replace placeholders with real content; wrap each translated word in **bold** markdown; ' +
+    'indent the example sentence with three spaces; no dashes, no labels):\n' +
     '🇩🇪 DE\n' +
-    'translation_word_1\n' +
-    '- short definition: "example sentence."\n' +
-    'translation_word_2\n' +
-    '- short definition: "example sentence."\n\n' +
+    '**translated_word_1**\n' +
+    '   <one short example sentence using that word>\n' +
+    '**translated_word_2**\n' +
+    '   <one short example sentence using that word>\n\n' +
     '🇺🇦 UK\n' +
-    'translation_word_1\n' +
-    '- short definition: "example sentence."\n\n' +
+    '**translated_word_1**\n' +
+    '   <one short example sentence using that word>\n\n' +
+    'After each translation word, put the example on a new line indented with three spaces (no dash, ' +
+    'no bullet, no label like "definition" or "example"). Wrap example sentences in straight double quotes.\n' +
     'For verbs with multiple distinct sub-meanings, list each sub-meaning under the same ' +
     'language header. For nouns and other words, usually one translation is enough.\n\n' +
     'No preamble, no explanation, no model name, no extra text. Just the formatted translations.\n' +
