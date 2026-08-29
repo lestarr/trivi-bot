@@ -4,7 +4,7 @@ project: Trivi
 slug: 20260828-trivi-key-onboarding
 effort: advanced
 effort_source: context-override
-phase: learn
+phase: complete
 progress: 38/38
 mode: interactive
 started: 2026-08-28T22:50:00-04:00
