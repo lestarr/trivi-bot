@@ -34,31 +34,33 @@ Trivi is a static Progressive Web App served from GitHub Pages. The frontend (HT
 
 ## Step 1 — Get a free Google key
 
-Trivi uses Google's Gemini AI to produce answers. You need a "key" — a long string Google gives you for free. No credit card required. Free tier covers normal personal use.
+Trivi has no server of its own — it asks Google's AI directly from your browser. For that, Google gives you a free **key**. Think of it as a library card: Google issues it, it costs nothing, and it tells Google whose free allowance to use. No credit card. Nobody else (including us) ever sees it.
 
-1. Open `aistudio.google.com` in your browser.
-2. Sign in with any Google account.
-3. Click **Get API Key** in the left panel.
-4. Click **Create API Key**.
-5. Copy the key (it starts with `AIza…`). Keep the tab open — we'll paste it in a moment.
+Trivi walks you through this. Open Trivi, tap the red welcome banner (or the gear icon), and you'll see three steps:
+
+1. Tap **Open Google's key page**. Sign in with any Google account if asked.
+2. On Google's page click **Create API key**, then copy the key. It is a long string that starts with `AIza`.
+3. Come back to Trivi, paste the key into **Paste your key here**, and tap **Test & save**.
 
 ![Google AI Studio — key](screenshots/google-apikey.png)
 
-Optional: you can also create an OpenAI key at `platform.openai.com/api-keys` and paste it as a fallback. OpenAI is not free; only add it if you want backup when Gemini is rate-limited.
+Optional: you can also create an OpenAI key at `platform.openai.com/api-keys` and paste it into the **OpenAI key** field as a backup. OpenAI is not free; only add it if you already have one.
 
 ---
 
-## Step 2 — Open Trivi and paste your key
+## Step 2 — Check that it worked
 
-1. Open the Trivi link you received with your purchase.
-2. Tap the gear icon (top right) to open Settings.
-3. Paste your key into the **Gemini API Key** field.
-4. (Optional) Paste an OpenAI key into the **OpenAI API Key** field.
-5. Tap **Save**.
+After **Test & save**, Trivi asks Google whether the key is good and tells you in plain words:
+
+- **Connected ✓** — you're done. Trivi will use this key every time you ask something.
+- **Google doesn't recognise this key** — go back to Google's page and copy the whole key again (the eye icon shows what you pasted).
+- **Couldn't reach Google** — check your internet connection and tap **Test & save** again.
 
 ![Settings — keys](screenshots/settings-api-keys.png)
 
-That's the whole setup. Trivi now uses that key every time you ask something.
+That's the whole setup.
+
+One thing to know: the key lives in this browser only. Anyone who uses this browser profile can use Trivi with it — so on a shared or borrowed device, tap **Remove this key** in Settings when you're done.
 
 ---
 
@@ -169,7 +171,7 @@ The exported file contains your **API keys in plain text**. Treat it like a pass
 
 ## Troubleshooting
 
-- **"Invalid API key" or no answer at all.** Open Settings, check that the key starts with `AIza…` and has no extra spaces. Save again.
+- **No answer, or a message about the key.** Open Settings and tap **Test & save** — Trivi will tell you in plain words whether Google accepts the key. If not, copy it again from Google's key page.
 - **No internet.** Trivi needs internet to reach Google or OpenAI. Offline answers don't work.
 - **Answer in the wrong language.** Open Settings and check **Target languages**. Save and try again.
 - **I cleared my browser and lost everything.** Use Import config to restore from a previous Export. Without one, you'll have to re-enter your key and any custom commands.

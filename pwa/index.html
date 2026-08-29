@@ -86,17 +86,33 @@ body{
   padding:4px;align-self:center;
 }
 .del-btn:disabled{color:#333;cursor:default}
-#add-cmd-btn,#save-btn{
+#add-cmd-btn,#save-btn,#test-gemini-btn{
   padding:8px 16px;border:none;border-radius:6px;cursor:pointer;
   font-size:14px;
 }
 #add-cmd-btn{background:#0f3460;color:#e0e0e0}
-#save-btn{background:#e94560;color:#fff;font-weight:600}
+#save-btn,#test-gemini-btn{background:#e94560;color:#fff;font-weight:600}
 #save-msg{font-size:13px;color:#4ecca3;display:none;margin-left:8px}
-/* Key status */
-.key-status{font-size:11px;margin-top:2px}
+/* Key setup */
+.setup-intro{font-size:13px;color:#bbb;line-height:1.5;margin:0 0 10px}
+.setup-intro code,.setup-steps code{background:#0f3460;padding:1px 5px;border-radius:4px;font-size:12px}
+.setup-steps{margin:0 0 14px;padding-left:22px;font-size:13px;color:#ddd;line-height:1.5}
+.setup-steps li{margin-bottom:10px}
+.step-hint{display:block;font-size:12px;color:#888}
+.step-btn{display:inline-block;background:#0f3460;color:#fff;padding:7px 12px;border-radius:8px;text-decoration:none;font-size:13px}
+.step-btn:hover{background:#16468a}
+.key-row{display:flex;gap:6px;align-items:stretch}
+.key-row input{flex:1;min-width:0}
+.eye-btn{background:transparent;border:1px solid #0f3460;border-radius:8px;color:#aaa;padding:0 8px;cursor:pointer;font-size:14px}
+#test-gemini-btn{white-space:nowrap}
+#test-gemini-btn:disabled{opacity:.6;cursor:wait}
+.key-status{font-size:12px;margin-top:4px;line-height:1.4}
 .key-ok{color:#4ecca3}
 .key-missing{color:#e94560}
+.key-warn{color:#f5c542}
+.key-hint{color:#888}
+.link-btn{background:none;border:none;color:#888;font-size:12px;text-decoration:underline;cursor:pointer;padding:2px 0;margin-top:4px}
+.link-btn:hover{color:#e94560}
 /* Setup banner */
 #setup-banner{
   background:#e94560;color:#fff;padding:12px 16px;border-radius:10px;
@@ -115,13 +131,18 @@ body{
   body{padding:12px 8px}
   #q{font-size:16px;padding:10px 12px}
   .cmd-row{grid-template-columns:50px 80px 1fr 30px;gap:4px}
+  /* Key field gets its own line; eye + Test & save share the next one. */
+  .key-row{flex-wrap:wrap}
+  .key-row input{flex:1 1 100%}
+  .eye-btn{flex:0 0 auto;padding:8px 14px}
+  #test-gemini-btn{flex:1 1 auto}
 }
 </style>
 </head>
 <body>
 <div id="app">
-  <div id="setup-banner" style="display:none" onclick="document.getElementById('settings').classList.add('open');this.style.display='none'">
-    Welcome to Trivi! Tap here to enter your API keys to get started.
+  <div id="setup-banner" style="display:none">
+    Welcome to Trivi! A one-time setup, about 2 minutes: tap here to connect Trivi to Google's free AI.
   </div>
 
   <div id="input-row">
@@ -134,15 +155,36 @@ body{
 
   <!-- Settings panel -->
   <div id="settings">
-    <h3>API Keys</h3>
+    <h3>Connect Trivi to Google's AI</h3>
+    <p class="setup-intro">
+      Trivi has no server of its own — it asks Google's AI directly from your browser.
+      For that, Google gives you a free <b>key</b> (Google calls it an &ldquo;API key&rdquo;). Think of it as a library card:
+      Google issues it, it costs nothing, no credit card, and it tells Google whose free allowance to use.
+      The key is stored only on this device — nobody else (including us) ever sees it.
+    </p>
+    <ol class="setup-steps">
+      <li>
+        <a class="step-btn" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Open Google's key page &#x2197;</a>
+        <span class="step-hint">Sign in with any Google account if asked. If sign-in fails, open Trivi in Chrome or Safari instead of a messenger's built-in browser.</span>
+      </li>
+      <li>
+        On that page click <b>&ldquo;Create API key&rdquo;</b>, then copy the key.
+        <span class="step-hint">It is a long string that starts with <code>AIza</code>.</span>
+      </li>
+      <li>
+        <label for="gemini-key">Paste your key here</label>
+        <div class="key-row">
+          <input type="text" id="gemini-key" placeholder="AIza&hellip;" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+          <button type="button" id="gemini-eye" class="eye-btn" title="Show or hide the key" aria-label="Show or hide the key">&#x1F441;</button>
+          <button type="button" id="test-gemini-btn">Test &amp; save</button>
+        </div>
+        <div class="key-status" id="gemini-status"></div>
+        <button type="button" id="remove-gemini-btn" class="link-btn" style="display:none">Remove this key</button>
+      </li>
+    </ol>
     <div>
-      <label for="gemini-key">Gemini API Key</label>
-      <input type="password" id="gemini-key" placeholder="AIza...">
-      <div class="key-status" id="gemini-status"></div>
-    </div>
-    <div>
-      <label for="openai-key">OpenAI API Key (optional fallback)</label>
-      <input type="password" id="openai-key" placeholder="sk-...">
+      <label for="openai-key">OpenAI key (optional &mdash; only if you already have one)</label>
+      <input type="password" id="openai-key" placeholder="sk-&hellip;" autocomplete="off">
       <div class="key-status" id="openai-status"></div>
     </div>
 
@@ -164,6 +206,17 @@ body{
       <button id="save-btn">Save</button>
       <span id="save-msg">Saved &#x2713;</span>
     </div>
+
+    <h3>Backup</h3>
+    <div style="font-size:12px;color:#888;margin-bottom:8px">
+      Your settings (including your Google key) live only in this browser. Export a backup file so you can restore them after clearing browser data or moving to another device.
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button id="export-btn" style="padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:14px;background:#0f3460;color:#e0e0e0">Export config</button>
+      <button id="import-btn" style="padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:14px;background:#0f3460;color:#e0e0e0">Import config</button>
+      <input type="file" id="import-file" accept="application/json" style="display:none">
+      <span id="backup-msg" style="font-size:13px;color:#4ecca3;align-self:center;display:none"></span>
+    </div>
   </div>
   <div style="text-align:center;padding:20px 0 4px;font-size:16px;color:#ddd">
     <a href="https://github.com/litai-solutions" style="color:#ddd;text-decoration:none;display:inline-flex;align-items:center;gap:14px">
@@ -180,16 +233,17 @@ body{
 
   const DEFAULT_CONFIG = {
     geminiKey: '',
+    geminiKeyVerified: false,
     openaiKey: '',
     translation: { source: 'English', targets: 'German, Ukrainian' },
     commands: [
-      { prefix: 'e', full_prefix: 'explain', label: 'Explain',
+      { prefix: 'e', full_prefix: 'explain', label: 'Explain', aliases: ['п'],
         prompt: 'Explain the following concept in 3-6 sentences. Be clear and concise. No preamble. Use short paragraphs or bullets for readability. Important: Never answer in Russian. If a Slavic language is needed, use Ukrainian only.',
         deletable: false },
-      { prefix: 'c', full_prefix: 'command', label: 'Command',
+      { prefix: 'c', full_prefix: 'command', label: 'Command', aliases: ['к'],
         prompt: 'Give the bash or python command for this task. No preamble, no explanation, no comments. Just the command.',
         deletable: false },
-      { prefix: 'q', full_prefix: 'question', label: 'Question',
+      { prefix: 'q', full_prefix: 'question', label: 'Question', aliases: ['з'],
         prompt: 'Answer this question directly and concisely. No preamble, no hedging. Just the answer. Important: Never answer in Russian. If a Slavic language is needed, use Ukrainian only.',
         deletable: false },
     ],
@@ -242,25 +296,194 @@ body{
     updateKeyStatus();
   }
 
+  function setGeminiStatus(text, cls) {
+    geminiStatus.textContent = text;
+    geminiStatus.className = 'key-status ' + cls;
+  }
+
   function updateKeyStatus() {
-    if (cfg.geminiKey) {
-      geminiStatus.textContent = 'Key saved';
-      geminiStatus.className = 'key-status key-ok';
+    if (cfg.geminiKey && cfg.geminiKeyVerified) {
+      setGeminiStatus('Connected ✓ — Trivi can use Google\'s AI.', 'key-ok');
+    } else if (cfg.geminiKey) {
+      setGeminiStatus('Key saved — not tested yet. Tap "Test & save" to check it.', 'key-warn');
     } else {
-      geminiStatus.textContent = 'Required — get one free at aistudio.google.com';
-      geminiStatus.className = 'key-status key-missing';
+      setGeminiStatus('Needed for Trivi to work. Follow the three steps above — it takes about 2 minutes.', 'key-missing');
     }
     if (cfg.openaiKey) {
       openaiStatus.textContent = 'Key saved';
       openaiStatus.className = 'key-status key-ok';
     } else {
-      openaiStatus.textContent = 'Optional — used as fallback if Gemini fails';
-      openaiStatus.className = 'key-status key-missing';
+      openaiStatus.textContent = 'Optional — Trivi works without it.';
+      openaiStatus.className = 'key-status key-hint';
+    }
+  }
+
+  // --- Guided key setup ---
+  const testGeminiBtn = document.getElementById('test-gemini-btn');
+  const removeGeminiBtn = document.getElementById('remove-gemini-btn');
+  const geminiEye = document.getElementById('gemini-eye');
+  // Google keys look like AIza + ~35 url-safe chars. Used to EXTRACT a key from a messy paste, never to block.
+  const KEY_EXTRACT = /AIza[\w-]{20,}/;
+  const TEST_TIMEOUT_MS = 12000;
+
+  function maskKeyInput() {
+    // Verified + unchanged → mask (show only that a key is stored). Otherwise plain text so a paste is readable.
+    const want = (cfg.geminiKeyVerified && geminiKeyInput.value === cfg.geminiKey) ? 'password' : 'text';
+    // Only write when it actually changes: reassigning `type` can move the caret to the end mid-typing.
+    if (geminiKeyInput.type !== want) geminiKeyInput.type = want;
+    removeGeminiBtn.style.display = cfg.geminiKey ? '' : 'none';
+  }
+
+  setupBanner.addEventListener('click', () => {
+    settingsPanel.classList.add('open');
+    setupBanner.style.display = 'none';
+    geminiKeyInput.focus();
+    geminiKeyInput.scrollIntoView({ block: 'center' });
+  });
+
+  geminiEye.addEventListener('click', () => {
+    geminiKeyInput.type = geminiKeyInput.type === 'password' ? 'text' : 'password';
+  });
+
+  geminiKeyInput.addEventListener('input', () => {
+    if (geminiKeyInput.value.trim() !== cfg.geminiKey) {
+      setGeminiStatus('Not tested yet — tap "Test & save".', 'key-warn');
+    } else {
+      updateKeyStatus();
+    }
+    maskKeyInput();
+  });
+
+  geminiKeyInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); testGeminiKey(); }
+  });
+
+  testGeminiBtn.addEventListener('click', testGeminiKey);
+
+  removeGeminiBtn.addEventListener('click', () => {
+    cfg.geminiKey = '';
+    cfg.geminiKeyVerified = false;
+    saveConfig(cfg);
+    if (!cfg.openaiKey) setupBanner.style.display = 'block';
+    geminiKeyInput.value = '';
+    updateKeyStatus();
+    maskKeyInput();
+    geminiKeyInput.focus();
+  });
+
+  // Plain-language message for each way Google can say no. `reason`/`message` come from the JSON error body.
+  function keyErrorMessage(status, reason, message) {
+    const msg = (message || '').toLowerCase();
+    // Every 400 carries the same plain-language line: Google only returns 400 here when the key itself is rejected,
+    // and the `reason` detail is not guaranteed to be present in the body.
+    if (status === 400) {
+      return "Google doesn't recognise this key. Go back to Google's key page and copy the whole key again (the eye icon shows what you pasted).";
+    }
+    if (status === 403 && msg.includes('location')) {
+      return "Google's AI is not available from your current location or network. If you use a VPN, try turning it off (or on) and test again.";
+    }
+    if (status === 403 && reason === 'SERVICE_DISABLED') {
+      return "This key exists, but Google's AI is switched off for it. On Google's key page, create a new key in a new project.";
+    }
+    if (status === 403) return "Google refused this key. On Google's key page, check the key is still active, or create a new one.";
+    return `Google answered with an error (${status}). Wait a minute and try again; if it keeps happening, create a new key.`;
+  }
+
+  let testInFlight = false;
+
+  async function testGeminiKey() {
+    if (testInFlight) return;
+    const raw = geminiKeyInput.value;
+    // Strip whitespace, non-breaking spaces, zero-width chars and BOMs that ride along with a copy-paste.
+    const key = (raw.match(KEY_EXTRACT) || [raw.replace(/[\s\u00A0\u200B-\u200D\uFEFF]+/g, '')])[0];
+    if (!key) {
+      setGeminiStatus('Paste your key first (step 3), then tap "Test & save".', 'key-missing');
+      geminiKeyInput.focus();
+      return;
+    }
+    geminiKeyInput.value = key;
+    if (navigator.onLine === false) {
+      setGeminiStatus("You seem to be offline. Connect to the internet and tap \"Test & save\" again.", 'key-missing');
+      return;
+    }
+    if (!KEY_EXTRACT.test(key)) {
+      // Not the usual shape — still let Google be the judge, but say so.
+      setGeminiStatus("Hmm, Google keys usually start with AIza. Checking with Google anyway…", 'key-warn');
+    } else {
+      setGeminiStatus('Checking with Google…', 'key-warn');
+    }
+    testInFlight = true;
+    testGeminiBtn.disabled = true;
+    const originalLabel = testGeminiBtn.textContent;
+    testGeminiBtn.textContent = 'Testing…';
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), TEST_TIMEOUT_MS);
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key)}`,
+        { cache: 'no-store', signal: ctrl.signal });
+      if (res.ok) {
+        cfg.geminiKey = key;
+        cfg.geminiKeyVerified = true;
+        saveConfig(cfg);
+        setupBanner.style.display = 'none';
+        const data = await res.json().catch(() => ({}));
+        const hasModel = (data.models || []).some(m => (m.name || '').endsWith('/' + GEMINI_MODEL));
+        if (hasModel) {
+          updateKeyStatus();
+        } else {
+          setGeminiStatus(`Connected ✓ — key saved. (Google didn't list the model Trivi uses, ${GEMINI_MODEL}; if answers fail, create a new key.)`, 'key-ok');
+        }
+        maskKeyInput();
+        return;
+      }
+      const err = await res.json().catch(() => ({}));
+      const details = Array.isArray(err.error?.details) ? err.error.details : [];
+      const reason = details.find(d => d && d.reason)?.reason || err.error?.status || '';
+      if (res.status === 429 || res.status >= 500) {
+        // Google is busy, not the key. Don't block onboarding on Google's bad day.
+        cfg.geminiKey = key;
+        cfg.geminiKeyVerified = false;
+        saveConfig(cfg);
+        setupBanner.style.display = 'none';
+        setGeminiStatus(`Key saved. Google is busy right now (${res.status}) so it could not be fully checked — try asking Trivi something in a minute.`, 'key-warn');
+        maskKeyInput();
+        return;
+      }
+      // cfg is left untouched: the rejected paste was never stored, so any previously
+      // verified key stays verified and Trivi keeps working.
+      setGeminiStatus(keyErrorMessage(res.status, reason, err.error?.message), 'key-missing');
+    } catch (e) {
+      if (e.name === 'AbortError') {
+        setGeminiStatus("Google didn't answer within 12 seconds. Check your connection and tap \"Test & save\" again.", 'key-missing');
+      } else {
+        setGeminiStatus("Couldn't reach Google. Check your internet connection and try again.", 'key-missing');
+      }
+    } finally {
+      clearTimeout(timer);
+      testInFlight = false;
+      testGeminiBtn.disabled = false;
+      testGeminiBtn.textContent = originalLabel;
     }
   }
 
   // --- Focus management ---
-  window.addEventListener('focus', () => { qInput.focus(); qInput.select(); });
+  window.addEventListener('focus', () => {
+    const settingsOpen = settingsPanel.classList.contains('open');
+    const active = document.activeElement;
+    const inField = !!active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA');
+    // Never pull the caret out of a field the user is already in — the OpenAI key,
+    // the language boxes, a command prompt, or the key field itself.
+    if (inField && active !== qInput) return;
+    // Coming back from Google's key page: keep focus on the key field, not the question box.
+    if (settingsOpen && !cfg.geminiKeyVerified) {
+      geminiKeyInput.focus();
+      geminiKeyInput.scrollIntoView({ block: 'center' });
+      return;
+    }
+    // Settings open and already connected: the user is mid-edit somewhere, leave focus alone.
+    if (settingsOpen) return;
+    qInput.focus(); qInput.select();
+  });
   qInput.addEventListener('focus', () => qInput.select());
 
   // --- Apply config to UI ---
@@ -271,6 +494,7 @@ body{
     openaiKeyInput.value = cfg.openaiKey || '';
     renderCommands();
     updateKeyStatus();
+    maskKeyInput();
   }
 
   function renderCommands() {
@@ -319,7 +543,9 @@ body{
 
   // --- Save ---
   saveBtn.addEventListener('click', () => {
-    cfg.geminiKey = geminiKeyInput.value.trim();
+    const newGeminiKey = geminiKeyInput.value.trim();
+    if (newGeminiKey !== cfg.geminiKey) cfg.geminiKeyVerified = false;
+    cfg.geminiKey = newGeminiKey;
     cfg.openaiKey = openaiKeyInput.value.trim();
     cfg.translation = { source: srcLang.value, targets: tgtLangs.value };
     cfg.commands.forEach(c => { c.full_prefix = c.label.toLowerCase(); });
@@ -328,6 +554,57 @@ body{
     setupBanner.style.display = 'none';
     saveMsg.style.display = 'inline';
     setTimeout(() => saveMsg.style.display = 'none', 2000);
+  });
+
+  // --- Export / Import config ---
+  const exportBtn = document.getElementById('export-btn');
+  const importBtn = document.getElementById('import-btn');
+  const importFile = document.getElementById('import-file');
+  const backupMsg = document.getElementById('backup-msg');
+
+  function showBackupMsg(text, color) {
+    backupMsg.textContent = text;
+    backupMsg.style.color = color || '#4ecca3';
+    backupMsg.style.display = 'inline';
+    setTimeout(() => backupMsg.style.display = 'none', 3000);
+  }
+
+  exportBtn.addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(cfg, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const ts = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `trivi-config-${ts}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showBackupMsg('Exported ✓');
+  });
+
+  importBtn.addEventListener('click', () => importFile.click());
+
+  importFile.addEventListener('change', () => {
+    const file = importFile.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const imported = JSON.parse(String(reader.result));
+        if (!imported || typeof imported !== 'object') throw new Error('Invalid file');
+        cfg = { ...DEFAULT_CONFIG, ...imported };
+        saveConfig(cfg);
+        applyConfig();
+        setupBanner.style.display = 'none';
+        showBackupMsg('Imported ✓');
+      } catch (e) {
+        showBackupMsg('Import failed: ' + (e.message || 'invalid file'), '#e94560');
+      } finally {
+        importFile.value = '';
+      }
+    };
+    reader.readAsText(file);
   });
 
   // --- LLM API calls (direct from browser) ---
@@ -428,7 +705,7 @@ body{
       const text = await callOpenAI(systemPrompt, userInput);
       return { text, model: 'OpenAI (gpt-4o-mini)' };
     }
-    throw new Error('No API keys configured. Open Settings to add your keys.');
+    throw new Error("Trivi isn't connected to Google's AI yet. Tap the gear icon and follow the three setup steps.");
   }
 
   // --- Cyrillic → Latin normalization for command prefixes ---
@@ -455,15 +732,21 @@ body{
 
   // --- Input parsing ---
   function parseInput(text) {
-    const lower = normalizeCyrillic(text.toLowerCase());
+    const lower = text.toLowerCase();
+    const lowerNorm = normalizeCyrillic(lower);
     for (const cmd of (cfg.commands || [])) {
-      const prefixShort = cmd.prefix.toLowerCase() + ' ';
-      const prefixFull = cmd.full_prefix.toLowerCase() + ' ';
-      if (lower.startsWith(prefixShort)) {
-        return { mode: cmd.label, prompt: cmd.prompt, input: text.slice(prefixShort.length) };
-      }
-      if (lower.startsWith(prefixFull)) {
-        return { mode: cmd.label, prompt: cmd.prompt, input: text.slice(prefixFull.length) };
+      const candidates = [cmd.prefix, cmd.full_prefix, ...(cmd.aliases || [])];
+      for (const raw of candidates) {
+        if (!raw) continue;
+        const c = String(raw).toLowerCase() + ' ';
+        // Match against the original (handles native Cyrillic aliases like "з ")
+        if (lower.startsWith(c)) {
+          return { mode: cmd.label, prompt: cmd.prompt, input: text.slice(c.length) };
+        }
+        // Match against the homoglyph-normalized form (handles "е "→"e ", "с "→"c ")
+        if (lowerNorm.startsWith(c)) {
+          return { mode: cmd.label, prompt: cmd.prompt, input: text.slice(c.length) };
+        }
       }
     }
     return { mode: 'Translation', prompt: '', input: text };

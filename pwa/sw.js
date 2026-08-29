@@ -1,4 +1,4 @@
-const CACHE = 'trivi-v2';
+const CACHE = 'trivi-v3';
 const SHELL = ['./', 'manifest.json', 'icon-192.svg', 'icon-512.svg'];
 
 self.addEventListener('install', e => {
